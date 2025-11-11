@@ -262,24 +262,6 @@ def hash_password(password):
     """Hash a password for storing."""
     return hashlib.sha256(password.encode()).hexdigest()
 
-def ensure_admin_exists():
-    """Automatically create admin accounts if none exist"""
-    with db_manager.get_connection() as conn:
-        cur = conn.cursor()
-        cur.execute("SELECT COUNT(*) FROM admin_users")
-        if cur.fetchone()[0] == 0:
-            # Create admin accounts
-            admins = [
-                ("evansowaifo@gmail.com", hash_password("dudebabe")),
-                ("SalamiayoJobapp@gmail.com", hash_password("Deskat21@"))
-            ]
-            
-            for email, pwd_hash in admins:
-                cur.execute("INSERT OR IGNORE INTO admin_users (email, password_hash) VALUES (?, ?)", 
-                           (email, pwd_hash))
-            
-            conn.commit()
-
 def verify_password(password, hashed):
     """Verify a stored password against one provided by user"""
     return hash_password(password) == hashed
@@ -1985,7 +1967,6 @@ def main():
     init_session_state()
     init_db_and_migrate()
     init_admin_table()  # Only creates table structure, no default users
-    ensure_admin_exists()  # Auto-create admin accounts if none exist
     init_audit_log_table()  # Initialize audit log system
     
     # Check if we should show audit logs
